@@ -20,9 +20,10 @@ export default {
       sizeselect: null,
       refArticle: null,
       stockArticle: 0,
-      ruptureArticle:"test",
+      selectedQuantity: null,
+      ruptureArticle: "test",
       stockOptions: [],
-      stockColor : null,
+      stockColor: null,
     };
   },
 
@@ -33,15 +34,19 @@ export default {
       this.stockArticle = this.getStockForSize(size);
       this.updateStockOptions();
       this.ruptureStock();
-      
+
     },
+
+    updateSelectedQuantity(event) {
+    this.selectedQuantity = event.target.value;
+  },
 
     updateStockOptions() {
       this.stockOptions = [0, ...Array.from({ length: this.stockArticle }, (_, i) => i + 1)];
     },
 
     ruptureStock() {
-      if (this.stockArticle == 0){
+      if (this.stockArticle == 0) {
         this.ruptureArticle = "Rupture";
         this.stockColor = "red";
       } else {
@@ -56,11 +61,23 @@ export default {
       );
       return stockForSize ? stockForSize.stock : 0;
     },
-
-    selectRef(ref) {
+    selectArt(ref) {
       this.refArticle = ref;
       
     },
+    addToCart() {
+      // Émettre un événement avec la référence de l'article
+      console.log("Référence de l'article :", this.hoodie.ref);
+    console.log("Taille sélectionnée :", this.sizeselect);
+    console.log("Quantité sélectionnée :", this.selectedQuantity);
+
+    this.$emit('add-to-cart', {
+      refArticle: this.hoodie.ref,
+    size: this.sizeselect,
+    qtt: this.selectedQuantity 
+  });
+    },
+
   },
 
   watch: {
@@ -90,23 +107,26 @@ export default {
         <p class="text-xs text-neutral-600">
           <SizeSelectCard v-for="(size, sizeIndex) in hoodie.availableSize" :key="sizeIndex" :size="size"
             :sizeIndex="sizeIndex" :selectedSizeIndex="selectedSizeIndex" @size-selected="updateSelectedSizeIndex"
-            @click="selectRef(hoodie.ref)" />
+            @click="selectArt(hoodie.ref)" />
         </p>
         <div class="flex flex-row mt-12 space-elements">
           <div class="basis-1/4 w-96 ">
             QTY
-            <select>
+            <select @change="updateSelectedQuantity">
               <option v-if="!refArticle">Select Size</option>
               <option v-if="refArticle" v-for="quantity in stockOptions" :key="quantity" :value="quantity">
                 {{ quantity }}
               </option>
 
             </select>
-            <p v-if="refArticle"> Stock : <span :class="{ 'stockInfo-red': stockColor === 'red', 'stockInfo-green': stockColor === 'green' }">{{ ruptureArticle }}</span> </p>
+            <p v-if="refArticle"> Stock : <span
+                :class="{ 'stockInfo-red': stockColor === 'red', 'stockInfo-green': stockColor === 'green' }">{{
+                  ruptureArticle }}</span> </p>
           </div>
           <div class="basis-1/4">
             <button type="button"
-              class="inline-block rounded border-2 bg-tertiary-contrast text-card-background-light border-button-text px-6 pt-2 pb-2 text-xs font-medium uppercase leading-normal text-info w-44">
+              class="inline-block rounded border-2 bg-tertiary-contrast text-card-background-light border-button-text px-6 pt-2 pb-2 text-xs font-medium uppercase leading-normal text-info w-44"
+              @click="addToCart">
               ADD TO CART
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                 stroke="currentColor" class="ml-2 w-6 h-6 float-right">
@@ -123,7 +143,7 @@ export default {
 </template>
 
 <style>
-.space-elements{
+.space-elements {
   justify-content: space-between;
 }
 

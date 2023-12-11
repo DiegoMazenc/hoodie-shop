@@ -16,16 +16,24 @@ export default {
   },
   methods: {
 
-    updateSelectedSizeIndex(ref, index) {
+    updateSelectedSizeIndex(index) {
       this.selectedSizeIndex = index;
+    },
+
+  
+
+    ...mapActions(useHoodieStore, ["updateRefArticle" , 'updateCart']),
+    addToCartHandler({ refArticle, size, qtt }) {
+      // Utilisez la nouvelle action du store
+      this.updateCart({ refArticle, size, quantity: qtt });
     },
     
   },
 
   computed: {
-    ...mapState(useHoodieStore, ["hoodie"]),
+    ...mapState(useHoodieStore, ["hoodie", "cart"]),
     hoodies() {
-      return this.hoodie; // Assuming 'hoodie' is an array in your store state
+      return this.hoodie;
     },
   }
 };
@@ -39,6 +47,7 @@ export default {
       v-for="(hoodie, index) in hoodies"
         :key="index"
         :hoodie="hoodie"
+        @add-to-cart="addToCartHandler"
         />
     </div>
   </div>
